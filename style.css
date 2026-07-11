@@ -1,0 +1,284 @@
+/* ===== RESET & BASE ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+a {
+  color: #4fc3f7;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ===== NAV ===== */
+nav {
+  background: #000000;
+  padding: 12px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #90a3ba;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-brand {
+  font-size: 1.3em;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+nav ul li a {
+  color: #b0b0b0;
+  font-size: 0.9em;
+}
+
+nav ul li a:hover {
+  color: #9fcce1;
+}
+
+/* ===== HEADER ===== */
+header {
+  text-align: center;
+  padding: 60px 20px 40px;
+  border-bottom: 1px solid #7c7cb5;
+}
+
+header h1 {
+  font-size: 2.8em;
+  color: #7e55c4;
+  margin-bottom: 10px;
+}
+
+.tagline {
+  font-size: 1.15em;
+  color: #ccc;
+  max-width: 700px;
+  margin: 0 auto 8px;
+}
+
+.subtitle {
+  font-size: 0.9em;
+  color: #888;
+  margin-bottom: 25px;
+}
+
+.proof-img {
+  max-width: 600px;
+  width: 90%;
+  border-radius: 8px;
+  border: 2px solid #333;
+  margin: 15px 0 5px;
+}
+
+.caption {
+  font-size: 0.85em;
+  color: #888;
+  font-style: italic;
+}
+
+/* ===== MAIN CONTENT ===== */
+main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+section {
+  margin: 50px 0;
+  padding-bottom: 40px;
+  border-bottom: 1px solid #2a2a4a;
+}
+
+section:last-child {
+  border-bottom: none;
+}
+
+h2 {
+  font-size: 1.8em;
+  color: #8558e0;
+  margin-bottom: 15px;
+}
+
+h3 {
+  font-size: 1.25em;
+  color: #6d338a;
+  margin: 25px 0 10px;
+}
+
+h4 {
+  font-size: 1.05em;
+  color: #ce93d8;
+  margin: 20px 0 8px;
+}
+
+p {
+  margin-bottom: 12px;
+}
+
+ul,
+ol {
+  margin: 10px 0 15px 25px;
+}
+
+li {
+  margin-bottom: 6px;
+}
+
+/* ===== CODE BLOCKS ===== */
+pre {
+  background: #0d1117;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 14px 18px;
+  overflow-x: auto;
+  margin: 10px 0 15px;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+code {
+  font-family: "Consolas", "Courier New", monospace;
+  color: #a5d6a7;
+}
+
+pre code {
+  color: #a5d6a7;
+}
+
+/* inline code */
+p code,
+li code,
+td code {
+  background: #2a2a4a;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  color: #f48fb1;
+}
+
+pre.output {
+  background: #111;
+  border-left: 3px solid #4fc3f7;
+  color: #bbb;
+}
+
+pre.output code {
+  color: #bbb;
+}
+
+/* ===== TABLES ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+}
+
+th,
+td {
+  border: 1px solid #333;
+  padding: 10px 14px;
+  text-align: left;
+}
+
+th {
+  background: #16213e;
+  color: #4fc3f7;
+}
+
+td {
+  background: #1a1a2e;
+}
+
+/* ===== BOXES ===== */
+.warning-box {
+  background: #2a1a00;
+  border: 1px solid #e1c396;
+  border-left: 4px solid #ff9800;
+  padding: 14px 18px;
+  border-radius: 4px;
+  margin: 15px 0;
+  font-size: 0.95em;
+}
+
+.math-box {
+  background: #1a1a3e;
+  border: 1px solid #7c4dff;
+  border-left: 4px solid #7c4dff;
+  padding: 16px 20px;
+  border-radius: 4px;
+  margin: 15px 0;
+}
+
+.hint {
+  color: #aaa;
+  font-size: 0.9em;
+  font-style: italic;
+}
+
+/* ===== COLORS ===== */
+.green {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.red {
+  color: #f44336;
+  font-weight: bold;
+}
+
+/* ===== FOOTER ===== */
+footer {
+  text-align: center;
+  padding: 30px 20px;
+  color: #666;
+  font-size: 0.85em;
+  border-top: 1px solid #2a2a4a;
+  margin-top: 40px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  header h1 {
+    font-size: 2em;
+  }
+
+  nav {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  nav ul {
+    gap: 12px;
+    justify-content: center;
+  }
+
+  main {
+    padding: 15px;
+  }
+
+  pre {
+    font-size: 0.8em;
+    padding: 10px;
+  }
+}

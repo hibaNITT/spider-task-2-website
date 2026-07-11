@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Octo-Shell | Build Your Own Shell in C</title>
+    <meta name="description"
+        content="A beginner-friendly guide to building a custom Unix shell with encrypted file transfer and intrusion detection in C.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-brand"> Octo-Shell</div>
+        <ul>
+            <li><a href="#about">About</a></li>
+            <li><a href="#setup">Setup</a></li>
+            <li><a href="#level1">Level 1</a></li>
+            <li><a href="#level2">Level 2</a></li>
+            <li><a href="#level3">Level 3</a></li>
+            <li><a href="#level4">Level 4</a></li>
+        </ul>
+    </nav>
+
+    <header>
+        <h1> Octo-Shell</h1>
+        <p class="tagline">A custom Unix shell built from scratch in C — with encrypted file transfer & intrusion
+            detection!</p>
+        <p class="subtitle">Spider Inductions Task 2 · NIT Trichy</p>
+        <img src="../proof.png" alt="Codecrafters Shell Challenge Completed" class="proof-img">
+        <p class="caption">proof - all base stages completed on Codecrafters </p>
+    </header>
+
+    <main>
+
+        <!-- ABOUT -->
+        <section id="about">
+            <h2>What is this project?</h2>
+            <p>Octo-Shell is a <strong>custom shell</strong> written entirely in C. Think of it like building your own
+                mini version of bash/zsh from scratch.</p>
+
+            <ul>
+                <li><strong>Level 1:</strong> A working shell with builtins (echo, cd, exit) and external command
+                    execution</li>
+                <li><strong>Level 2:</strong> NITTalk — a custom file transfer protocol with a 72-byte packed header
+                </li>
+                <li><strong>Level 3:</strong> Diffie-Hellman key exchange + XOR stream cipher encryption</li>
+                <li><strong>Level 4:</strong> Tripwire IDS — a raw socket intrusion detection system</li>
+            </ul>
+
+            <h3>Project Structure</h3>
+            <pre>
+Spider_Task_2/
+├── include/          # Header files (.h)
+│   ├── shell.h       # Shell prototypes + RadioHeader struct
+│   └── crypto.h      # DH key exchange + keystream functions
+├── src/              # Source code (.c)
+│   ├── main.c        # REPL loop
+│   ├── execute.c     # Tokenizer + fork/exec engine
+│   ├── nittalk.c     # File transfer protocol
+│   ├── crypto.c      # Modular exponentiation + LCG
+│   └── tripwire.c    # Raw socket IDS
+├── tests/            # Dummy files for testing
+├── Makefile          # Build automation
+└── README.md         # You are here :)
+            </pre>
+        </section>
+
+        <!-- SETUP -->
+        <section id="setup">
+            <h2> Setup — Before You Start</h2>
+
+            <div class="warning-box">
+                <strong>Important:</strong> This project uses POSIX headers (<code>unistd.h</code>,
+                <code>sys/wait.h</code>) so it <strong>must</strong> be compiled on Linux. On Windows, use WSL (Windows
+                Subsystem for Linux).
+            </div>
+
+            <h3>Step 1: Open WSL</h3>
+            <p>Open your terminal and launch Ubuntu:</p>
+            <pre><code>wsl -d ubuntu</code></pre>
+
+            <h3>Step 2: Install build tools (first time only)</h3>
+            <pre><code>sudo apt update
+sudo apt install build-essential</code></pre>
+
+            <h3>Step 3: Navigate to the project</h3>
+            <pre><code>cd /mnt/c/path/to/Hiba_spider_task2</code></pre>
+            <p class="hint"> Replace the path with wherever you cloned/downloaded the project on your machine.</p>
+
+            <h3>Step 4: Compile everything</h3>
+            <pre><code>make clean && make</code></pre>
+            <p>Or compile manually:</p>
+            <pre><code>gcc -Wall -Wextra -Iinclude src/main.c src/execute.c src/nittalk.c src/crypto.c -o octo-shell</code></pre>
+
+            <p>If it compiles without errors, you'll see an <code>octo-shell</code> executable. You're good to go! 🚀
+            </p>
+
+            <div class="warning-box">
+                <strong> Don't use Git Bash or MinGW</strong> — they don't support POSIX headers. Always use WSL
+                Ubuntu.<br>
+                If you see <code>Exec format error</code>, you're trying to run a Linux binary from Windows. Switch back
+                to WSL.
+            </div>
+        </section>
+
+        <!-- LEVEL 1 -->
+        <section id="level1">
+            <h2> Level 1 — The Core Shell</h2>
+            <p>This is where it all begins. We build a basic <strong>REPL</strong> (Read-Eval-Print Loop) — the heart of
+                any shell.</p>
+
+            <h3>How it works</h3>
+            <ol>
+                <li><code>main.c</code> prints the prompt <code>octo-shell$</code> and reads your input</li>
+                <li><code>execute.c</code> tokenizes the input (splits it into words)</li>
+                <li>If it's a builtin (<code>exit</code>, <code>cd</code>, <code>echo</code>), handle it directly</li>
+                <li>Otherwise, <code>fork()</code> a child process and use <code>execvp()</code> to run external
+                    programs</li>
+            </ol>
+
+            <h3>Quick test</h3>
+            <p>If you're only testing Level 1 (the basic shell from Codecrafters):</p>
+            <pre><code>cd /mnt/c/path/to/Hiba_spider_task2/codecrafters-shell-c/src
+gcc main.c -o shell
+./shell</code></pre>
+
+            <p>You should see:</p>
+            <pre class="output">$</pre>
+
+            <h3>Try these commands</h3>
+            <pre><code>echo hello world
+type ls
+ls -l
+cat main.c
+exit</code></pre>
+
+            <h3>Key concept: fork() + execvp()</h3>
+            <p>This is the classic Unix pattern for running commands:</p>
+            <pre><code>pid_t pid = fork();        // Split into parent + child
+if (pid == 0) {
+    execvp(args[0], args); // Child becomes the command
+} else {
+    waitpid(pid, NULL, 0); // Parent waits for child
+}</code></pre>
+            <p>The parent process (our shell) creates a clone of itself. The child clone then <em>replaces itself</em>
+                with whatever command you typed. The parent just waits.</p>
+        </section>
+
+        <!-- LEVEL 2 -->
+        <section id="level2">
+            <h2> Level 2 — NITTalk File Transfer</h2>
+            <p>Now we add <code>nittalk</code> — a custom command inside our shell that can <strong>send files over the
+                    network</strong> using TCP sockets.</p>
+
+            <h3>The 72-Byte Protocol Header</h3>
+            <p>Since TCP is just a stream of bytes, the receiver needs to know: <em>"what file is coming and how big is
+                    it?"</em></p>
+            <p>We solve this with a fixed-size header:</p>
+
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Size</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td>Verification</td>
+                    <td>4 bytes</td>
+                    <td>"NIT\0" — confirms it's our protocol</td>
+                </tr>
+                <tr>
+                    <td>Filename</td>
+                    <td>64 bytes</td>
+                    <td>Name of the file being sent</td>
+                </tr>
+                <tr>
+                    <td>Payload Size</td>
+                    <td>4 bytes</td>
+                    <td>File size in network byte order</td>
+                </tr>
+                <tr>
+                    <td><strong>Total</strong></td>
+                    <td><strong>72 bytes</strong></td>
+                    <td></td>
+                </tr>
+            </table>
+
+            <p>We use <code>__attribute__((packed))</code> to prevent the compiler from adding hidden padding bytes.</p>
+
+            <h3>How to test (you need 2 terminals!)</h3>
+
+            <p>First, compile:</p>
+            <pre><code>make clean && make</code></pre>
+
+            <h4>Terminal A — The Listener (Receiver)</h4>
+            <pre><code>./octo-shell
+octo-shell$ nittalk -listen</code></pre>
+            <p>You should see:</p>
+            <pre class="output">[] Initializing covert listening post on port 8080...
+[📡] Beacon online. Awaiting inbound transmission...</pre>
+
+            <h4>Terminal B — The Sender</h4>
+            <pre><code>echo "SPIDER network test transmission." > secrets.txt
+./octo-shell
+octo-shell$ nittalk -s 127.0.0.1 secrets.txt</code></pre>
+
+            <p>Sender output:</p>
+            <pre class="output">[*] Preparing stealth transmission payload to 127.0.0.1...
+[+] Link established! Transmitting 72-byte radio header...
+[+] Metadata broadcast complete.
+[] Initiating file transmission stream...
+All bytes deployed over the wire successfully.</pre>
+
+            <p>Listener output:</p>
+            <pre class="output">[] Target connected! Secure link established.
+[*] Synchronizing stream windows... Awaiting 72-byte header...
+[] Header Verified! Incoming File: 'secrets.txt' | Size: 84 bytes
+[] Downloading payload streams...
+ Success! File transmission complete.</pre>
+
+            <h4>Verify it worked</h4>
+            <pre><code>cat secrets.txt</code></pre>
+        </section>
+
+        <!-- LEVEL 3 -->
+        <section id="level3">
+            <h2>Level 3 — Encryption (Diffie-Hellman + XOR Cipher)</h2>
+            <p>Now we make the file transfer <strong>encrypted</strong>. Nobody snooping on the network can read the
+                files!</p>
+
+            <h3>The Math </h3>
+
+            <p><strong>Problem:</strong> How do two computers agree on a secret key without ever sending the key?</p>
+            <p><strong>Answer:</strong> Diffie-Hellman Key Exchange!</p>
+
+            <div class="math-box">
+                <p>Both sides know: <strong>p = 9973</strong> (prime), <strong>g = 5</strong> (generator)</p>
+                <ol>
+                    <li>Each side picks a random private key (<em>a</em> and <em>b</em>) — never shared</li>
+                    <li>Each computes a public key: <strong>A = g<sup>a</sup> mod p</strong>, <strong>B = g<sup>b</sup>
+                            mod p</strong></li>
+                    <li>They swap public keys over the network</li>
+                    <li>Each computes the shared secret: <strong>K = B<sup>a</sup> mod p = A<sup>b</sup> mod p</strong>
+                    </li>
+                </ol>
+                <p>Both get the same K, but an attacker who only sees A and B can't figure it out! </p>
+            </div>
+
+            <h3>Encryption with XOR</h3>
+            <p>The shared secret seeds a <strong>Linear Congruential Generator</strong> (LCG) that produces a stream of
+                pseudorandom bytes:</p>
+            <pre><code>next = (1664525 × current + 1013904223) mod 2³²</code></pre>
+            <p>Each file byte gets XOR'd with a keystream byte:</p>
+            <pre><code>encrypted = plaintext XOR keystream_byte
+decrypted = encrypted XOR keystream_byte  // XOR reverses itself!</code></pre>
+
+            <h3>How to test</h3>
+            <pre><code>echo "Hi!" > test.txt
+make</code></pre>
+
+            <h4>Terminal 1 (Receiver)</h4>
+            <pre><code>./octo-shell
+nittalk -listen</code></pre>
+
+            <h4>Terminal 2 (Sender)</h4>
+            <pre><code>./octo-shell
+nittalk -s 127.0.0.1 test.txt</code></pre>
+
+            <h3>What to check ✅</h3>
+            <ul>
+                <li>Both terminals print a <strong>Shared Secret</strong> number</li>
+                <li>The numbers <strong>must be identical</strong></li>
+                <li>Both should also print matching <strong>Keystream</strong> values</li>
+                <li><code>cat test.txt</code> should print "Hi!"</li>
+            </ul>
+
+            <pre class="output">Sender   → Shared Secret: 1571
+Receiver → Shared Secret: 1571
+Keystream: 186 209 252 43 142 149 240 ...  (must match!)</pre>
+        </section>
+
+        <!-- LEVEL 4 -->
+        <section id="level4">
+            <h2> Level 4 — Tripwire IDS (Intrusion Detection)</h2>
+            <p>The final boss. We build a <strong>raw socket packet sniffer</strong> that monitors network traffic and
+                flags unauthorized connections.</p>
+
+            <h3>How it works</h3>
+            <ul>
+                <li>Uses <code>SOCK_RAW</code> to capture packets at the IP layer</li>
+                <li>Extracts the source IP from each packet's IP header</li>
+                <li>Compares it against a trusted "teammate" IP</li>
+                <li><span class="green">Green</span> = authorized traffic, <span class="red">Red</span> = intruder
+                    alert!</li>
+            </ul>
+
+            <h3>Compile the tripwire</h3>
+            <pre><code>gcc src/tripwire.c -o src/tripwire</code></pre>
+
+            <div class="warning-box">
+                <strong>⚠️ Needs sudo!</strong> Raw sockets require root privileges.
+
+                <p>Sudo stands for "SuperUser DO." It
+                    is a command that allows a permitted user to execute a command with the security privileges of
+                    another
+                    user—specifically, the root (superuser).</p>
+
+                <p> We are using sudo because of the socket(AF_INET, SOCK_RAW, IPPROTO_TCP) call.
+
+                    When you use SOCK_RAW, you are telling the kernel: "I want to bypass your standard networking rules
+                    and
+                    talk directly to the network interface card (NIC) hardware."
+
+                <p> Access to Hardware: Raw access is incredibly powerful. A program with raw socket access can sniff
+                    private passwords, hijack connections, or spoof identities.
+                </p>
+                <p></p> The Restriction: Because this is a massive security risk, the Linux kernel strictly prohibits
+                standard
+                users from opening raw sockets.</p>
+                Only the root user is trusted with this level of access.
+
+                </p>
+
+
+            </div>
+
+            <h3>Testing on one laptop (3 terminals)</h3>
+
+
+            <h4>Terminal 1 — Compile the code:
+            </h4>
+            <pre><code>gcc src/tripwire.c -o src/tripwire</code></pre>
+
+            <h4>Run the Tripwire</h4>
+            <pre><code>sudo ./src/tripwire</code></pre>
+
+
+            <h4>output</h4>
+            <pre class="output">Tripwire Active. Monitoring traffic...</pre>
+
+            <h4>Terminal 2 — Act as the Receiver</h4>
+            <pre><code>nc -l 8080</code></pre>
+
+            <h4>Terminal 3 — Act as the "Teammate"</h4>
+            <pre><code>nc YOUR_IP_ADDRESS 8080</code></pre>
+            <p>Type something and hit Enter. Check Terminal 1:</p>
+            <pre class="output"><span class="green">[*] Authorized traffic from: 172.17.66.30</span></pre>
+
+            <h4>- Now test the intruder alert</h4>
+            <pre><code>curl -I https://www.google.com</code></pre>
+            <p>Check Terminal 1:</p>
+            <pre class="output"><span class="red">[!] ALERT: Intruder detected! Source: 142.250.x.x</span></pre>
+
+            <h2> Testing with 2 Laptop... the actual stuff cuz you need to be able to contact ur teammate who is using a
+                different laptop</h2>
+            <p>This is where it gets fun — you're running your IDS on one machine and attacking it from another. Here's
+                the full walkthrough.</p>
+            <h3>Phase 1: Prepare Laptop A (The Sentinel)</h3>
+            <p>This is the laptop that runs your C code. It watches the network.</p>
+            <p><strong>Find your IP address:</strong></p>
+            <pre><code>hostname -I</code></pre>
+            <p>Write this down — you'll need it. It'll look something like <code>172.17.66.10</code>.</p>
+            <p><strong>Compile and run the tripwire:</strong></p>
+            <pre><code># Navigate to your project folder
+cd /mnt/c/path/to/your/project
+# Compile
+gcc src/tripwire.c -o src/tripwire
+# Run with sudo (raw sockets need root!)
+sudo ./src/tripwire</code></pre>
+            <p>You should see:</p>
+            <pre class="output">Tripwire Active. Monitoring traffic...</pre>
+            <p><strong>Keep this terminal open.</strong> This is your security monitor — it'll show Green/Red alerts as
+                traffic comes in.</p>
+            <h3>Phase 2: Setup Laptop B (The Intruder/Teammate)</h3>
+            <p>Don't have WSL on Laptop B? No problem! PowerShell has built-in networking tools that work just fine.</p>
+            <p><strong>Open PowerShell as Administrator:</strong></p>
+            <li>Search for "PowerShell" in the Start menu</li>
+            <li>Right-click it</li>
+            <li>Click <strong>"Run as Administrator"</strong></li>
+            </ol>
+            <p><strong>Verify the laptops can see each other:</strong></p>
+            <pre><code>ping [IP_OF_LAPTOP_A]</code></pre>
+            <p>Replace <code>[IP_OF_LAPTOP_A]</code> with the IP you noted down earlier (e.g.
+                <code>172.17.66.10</code>).
+            </p>
+            <div class="warning-box">
+                <strong>Ping not working?</strong> Check these:
+                <ul>
+                    <li>Both laptops must be on the <strong>same WiFi network</strong></li>
+                    <li>On Windows, go to Settings → Network → change the Network Profile to <strong>"Private"</strong>
+                        (not "Public")</li>
+                    <li>If using a mobile hotspot, both laptops must be connected to the same phone</li>
+                </ul>
+            </div>
+            <h3>Phase 3: The Testing Steps</h3>
+            <p>Both laptops are ready. Now let's test.</p>
+            <h4>Test 1: The "Teammate" (expect Green ✅)</h4>
+            <p>This simulates an authorized connection from a known teammate.</p>
+            <p><strong>On Laptop A</strong> — open a <em>new</em> terminal window (keep tripwire running in the other
+                one) and start a listener:</p>
+            <pre><code>nc -l 8080</code></pre>
+            <p>This opens port 8080 and waits for a connection. The terminal will just sit there blinking — that's
+                normal.</p>
+            <p><strong>On Laptop B</strong> — connect to Laptop A from PowerShell:</p>
+            <pre><code># PowerShell's built-in netcat equivalent
+Test-NetConnection -ComputerName [IP_OF_LAPTOP_A] -Port 8080</code></pre>
+            <p>Or if you have netcat installed on Laptop B:</p>
+            <pre><code>nc [IP_OF_LAPTOP_A] 8080</code></pre>
+            <p><strong>Now check Laptop A's tripwire terminal.</strong> You should see:</p>
+            <pre class="output"><span class="green">[*] Authorized traffic from: [IP_OF_LAPTOP_B]</span></pre>
+            <p>Green text! The tripwire recognized the connection as coming from a trusted IP. 🎉</p>
+            <h4>Test 2: The "Intruder" (expect Red )</h4>
+            <p>Now let's trigger the alarm. Keep everything running on Laptop A.</p>
+            <p><strong>On Laptop B</strong> — try connecting to a port you're NOT using:</p>
+            <pre><code># Try port 22 (SSH) or any random port
+Test-NetConnection -ComputerName [IP_OF_LAPTOP_A] -Port 22</code></pre>
+            <p><strong>Check Laptop A's tripwire terminal:</strong></p>
+            <pre class="output"><span class="red">[!] ALERT: Intruder detected! Source: [IP_OF_LAPTOP_B]</span></pre>
+            <p>Red text! The tripwire flagged the unauthorized connection attempt. </p>
+            <p>If you see <span class="green">Green for the nc connection</span> and <span class="red">Red for the
+                    unauthorized port</span> — <strong>congratulations, your IDS is working!</strong></p>
+        </section>
+
+        <!-- QUICK REFERENCE -->
+        <section id="quickref">
+            <h2> Quick Reference — All Commands</h2>
+            <table>
+                <tr>
+                    <th>What</th>
+                    <th>Command</th>
+                </tr>
+                <tr>
+                    <td>Open WSL</td>
+                    <td><code>wsl -d ubuntu</code></td>
+                </tr>
+                <tr>
+                    <td>Compile everything</td>
+                    <td><code>make clean && make</code></td>
+                </tr>
+                <tr>
+                    <td>Run the shell</td>
+                    <td><code>./octo-shell</code></td>
+                </tr>
+                <tr>
+                    <td>Start listener</td>
+                    <td><code>nittalk -listen</code></td>
+                </tr>
+                <tr>
+                    <td>Send a file</td>
+                    <td><code>nittalk -s 127.0.0.1 filename.txt</code></td>
+                </tr>
+                <tr>
+                    <td>Compile tripwire</td>
+                    <td><code>gcc src/tripwire.c -o src/tripwire</code></td>
+                </tr>
+                <tr>
+                    <td>Run tripwire</td>
+                    <td><code>sudo ./src/tripwire</code></td>
+                </tr>
+            </table>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>finalyyy doneee!! Octo-Shell Spider Inductions Task 2 </p>
+    </footer>
+
+</body>
+
+</html>
