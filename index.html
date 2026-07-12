@@ -29,8 +29,6 @@
         <p class="tagline">A custom Unix shell built from scratch in C — with encrypted file transfer & intrusion
             detection!</p>
         <p class="subtitle">Spider Inductions Task 2 · NIT Trichy</p>
-        <img src="proof.png" alt="Codecrafters Shell Challenge Completed" class="proof-img">
-        <p class="caption">proof - all base stages completed on Codecrafters </p>
     </header>
 
     <main>
@@ -121,21 +119,49 @@ sudo apt install build-essential</code></pre>
                     programs</li>
             </ol>
 
-            <h3>Quick test</h3>
-            <p>If you're only testing Level 1 (the basic shell from Codecrafters):</p>
-            <pre><code>cd /mnt/c/path/to/Hiba_spider_task2/codecrafters-shell-c/src
-gcc main.c -o shell
-./shell</code></pre>
+            <h3>Testing Level 1</h3>
 
-            <p>You should see:</p>
+            <h4>1. Open WSL (Ubuntu)</h4>
+            <p>Since this project uses POSIX headers (<code>unistd.h</code>, <code>sys/wait.h</code>), it must be compiled inside Linux.<br>On Windows, launch Ubuntu via WSL:</p>
+            <pre><code>wsl -d ubuntu</code></pre>
+
+            <h4>2. Navigate to the project folder</h4>
+            <p>Move into the <code>src</code> directory where <code>main.c</code> is located:</p>
+            <pre><code>cd /mnt/c/path/to/Hiba_spider_task2/codecrafters-shell-c/src</code></pre>
+
+            <h4>3. Compile the program</h4>
+            <p>Use <code>gcc</code> to compile <code>main.c</code> into an executable named <code>shell</code>:</p>
+            <pre><code>gcc main.c -o shell</code></pre>
+            <p>If compilation succeeds, you'll see a new file called <code>shell</code> in the directory.</p>
+
+            <h4>4. Run the shell</h4>
+            <p>Execute the program:</p>
+            <pre><code>./shell</code></pre>
+            <p>You should now see your custom shell prompt:</p>
             <pre class="output">$</pre>
 
-            <h3>Try these commands</h3>
+            <h4>5. Test builtins and external commands</h4>
+            <p>Try out the builtins:</p>
             <pre><code>echo hello world
 type ls
-ls -l
-cat main.c
 exit</code></pre>
+
+            <p>And external programs:</p>
+            <pre><code>ls -l
+cat main.c
+grep int main.c</code></pre>
+
+            <h4>6. Exit the shell</h4>
+            <p>Type:</p>
+            <pre><code>exit</code></pre>
+            <p>to quit.</p>
+
+            <div class="warning-box">
+                <strong>Notes</strong><br>
+                - <strong>Do not compile/run in Git Bash or MinGW</strong> — they don't support POSIX headers. Always use WSL Ubuntu.<br>
+                - If you see <code>Exec format error</code>, it means you tried to run a Linux binary from Windows. Switch back to WSL.<br>
+                - Codecrafters tests will run your program in a Linux environment, so WSL matches the expected setup.
+            </div>
 
             <h3>Key concept: fork() + execvp()</h3>
             <p>This is the classic Unix pattern for running commands:</p>
@@ -422,6 +448,59 @@ Test-NetConnection -ComputerName [IP_OF_LAPTOP_A] -Port 22</code></pre>
             <p>Red text! The tripwire flagged the unauthorized connection attempt. </p>
             <p>If you see <span class="green">Green for the nc connection</span> and <span class="red">Red for the
                     unauthorized port</span> — <strong>congratulations, your IDS is working!</strong></p>
+
+            <hr>
+            <h3>WSL Network Connectivity Troubleshooting Guide</h3>
+            <p><strong>Problem Encountered:</strong> Laptop B was unable to ping Laptop A or communicate with the WSL instance.</p>
+            
+            <h4>Symptoms</h4>
+            <ul>
+                <li><code>ping 192.168.1.39</code> → Request timed out.</li>
+                <li><code>Test-NetConnection</code> → Ping failed.</li>
+                <li>WSL IP (<code>172.17.66.30</code>) was visible, but communication from another laptop was not possible.</li>
+            </ul>
+
+            <h4>Step 1: Verify WSL IP</h4>
+            <p>Inside WSL, check the IP address:</p>
+            <pre><code>ip a
+# or
+hostname -I</code></pre>
+            <p>Result: <code>WSL IP = 172.17.66.30</code></p>
+
+            <h4>Step 2: Verify Windows Wi-Fi IP</h4>
+            <p>In Windows PowerShell:</p>
+            <pre><code>ipconfig</code></pre>
+            <p>Result: <code>Wi-Fi IP = 192.168.1.39</code></p>
+
+            <h4>Step 3: Test Network Connectivity</h4>
+            <p>From Laptop B:</p>
+            <pre><code>ping 192.168.1.39</code></pre>
+            <p>Result: <code>Request timed out</code><br>This indicated that the problem was with Windows networking, not WSL.</p>
+
+            <h4>Step 4: Check Network Profile</h4>
+            <p>Run:</p>
+            <pre><code>Get-NetConnectionProfile</code></pre>
+            <p>Result: <code>NetworkCategory : Public</code><br>A Public network blocks many incoming connections by default.</p>
+
+            <h4>Step 5: Change Network to Private</h4>
+            <p>Run as Administrator:</p>
+            <pre><code>Set-NetConnectionProfile -InterfaceAlias "Wi-Fi" -NetworkCategory Private</code></pre>
+            <p>Verify:</p>
+            <pre><code>Get-NetConnectionProfile</code></pre>
+            <p>Result: <code>NetworkCategory : Private</code></p>
+
+            <h4>Step 6: Enable Ping Through Firewall</h4>
+            <p>Run:</p>
+            <pre><code>Enable-NetFirewallRule -Name FPS-ICMP4-ERQ-In</code></pre>
+            <p>This allows incoming ICMP (ping) requests.</p>
+
+            <h4>Step 7: Test Again</h4>
+            <p>From Laptop B:</p>
+            <pre><code>ping 192.168.1.39</code></pre>
+            <p>Result: <code>Reply from 192.168.1.39</code><br>Communication between the two laptops was successfully established.</p>
+
+            <h4>Root Cause</h4>
+            <p>The Windows Wi-Fi network was configured as <strong>Public</strong>, causing Windows Firewall to block incoming ICMP and network traffic between devices. Since Laptop B could not even reach Windows on Laptop A, the issue was unrelated to WSL.</p>
         </section>
 
         <!-- QUICK REFERENCE -->
