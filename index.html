@@ -29,6 +29,8 @@
         <p class="tagline">A custom Unix shell built from scratch in C — with encrypted file transfer & intrusion
             detection!</p>
         <p class="subtitle">Spider Inductions Task 2 · NIT Trichy</p>
+        <img src="proof.png" alt="Codecrafters Shell Challenge Completed" class="proof-img">
+        <p class="caption">proof - all base stages completed on Codecrafters </p>
     </header>
 
     <main>
@@ -126,17 +128,17 @@ sudo apt install build-essential</code></pre>
             <pre><code>wsl -d ubuntu</code></pre>
 
             <h4>2. Navigate to the project folder</h4>
-            <p>Move into the <code>src</code> directory where <code>main.c</code> is located:</p>
-            <pre><code>cd /mnt/c/path/to/Hiba_spider_task2/codecrafters-shell-c/src</code></pre>
+            <p>Move into the root project directory containing your <code>src</code> and <code>include</code> folders (e.g., <code>Hiba_spider_task2</code>):</p>
+            <pre><code>cd /path/to/Hiba_spider_task2</code></pre>
 
             <h4>3. Compile the program</h4>
-            <p>Use <code>gcc</code> to compile <code>main.c</code> into an executable named <code>shell</code>:</p>
-            <pre><code>gcc main.c -o shell</code></pre>
-            <p>If compilation succeeds, you'll see a new file called <code>shell</code> in the directory.</p>
+            <p>Use <code>gcc</code> to compile the source files into an executable named <code>octo-shell</code>:</p>
+            <pre><code>gcc -Iinclude src/main.c src/execute.c -o octo-shell</code></pre>
+            <p>If compilation succeeds, you'll see a new file called <code>octo-shell</code> in the directory.</p>
 
             <h4>4. Run the shell</h4>
             <p>Execute the program:</p>
-            <pre><code>./shell</code></pre>
+            <pre><code>./octo-shell</code></pre>
             <p>You should now see your custom shell prompt:</p>
             <pre class="output">$</pre>
 
