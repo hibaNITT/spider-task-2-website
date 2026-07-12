@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Octo-Shell | Build Your Own Shell in C</title>
+    <img src="proof.png" alt="Codecrafters Shell Challenge Completed" class="proof-img">
+    <p class="caption">proof - all base stages completed on Codecrafters </p>
     <meta name="description"
         content="A beginner-friendly guide to building a custom Unix shell with encrypted file transfer and intrusion detection in C.">
     <link rel="stylesheet" href="style.css">
@@ -124,11 +126,13 @@ sudo apt install build-essential</code></pre>
             <h3>Testing Level 1</h3>
 
             <h4>1. Open WSL (Ubuntu)</h4>
-            <p>Since this project uses POSIX headers (<code>unistd.h</code>, <code>sys/wait.h</code>), it must be compiled inside Linux.<br>On Windows, launch Ubuntu via WSL:</p>
+            <p>Since this project uses POSIX headers (<code>unistd.h</code>, <code>sys/wait.h</code>), it must be
+                compiled inside Linux.<br>On Windows, launch Ubuntu via WSL:</p>
             <pre><code>wsl -d ubuntu</code></pre>
 
             <h4>2. Navigate to the project folder</h4>
-            <p>Move into the root project directory containing your <code>src</code> and <code>include</code> folders (e.g., <code>Hiba_spider_task2</code>):</p>
+            <p>Move into the root project directory containing your <code>src</code> and <code>include</code> folders
+                (e.g., <code>Hiba_spider_task2</code>):</p>
             <pre><code>cd /path/to/Hiba_spider_task2</code></pre>
 
             <h4>3. Compile the program</h4>
@@ -160,8 +164,10 @@ grep int main.c</code></pre>
 
             <div class="warning-box">
                 <strong>Notes</strong><br>
-                - <strong>Do not compile/run in Git Bash or MinGW</strong> — they don't support POSIX headers. Always use WSL Ubuntu.<br>
-                - If you see <code>Exec format error</code>, it means you tried to run a Linux binary from Windows. Switch back to WSL.<br>
+                - <strong>Do not compile/run in Git Bash or MinGW</strong> — they don't support POSIX headers. Always
+                use WSL Ubuntu.<br>
+                - If you see <code>Exec format error</code>, it means you tried to run a Linux binary from Windows.
+                Switch back to WSL.<br>
                 - Codecrafters tests will run your program in a Linux environment, so WSL matches the expected setup.
             </div>
 
@@ -453,13 +459,15 @@ Test-NetConnection -ComputerName [IP_OF_LAPTOP_A] -Port 22</code></pre>
 
             <hr>
             <h3>WSL Network Connectivity Troubleshooting Guide</h3>
-            <p><strong>Problem Encountered:</strong> Laptop B was unable to ping Laptop A or communicate with the WSL instance.</p>
-            
+            <p><strong>Problem Encountered:</strong> Laptop B was unable to ping Laptop A or communicate with the WSL
+                instance.</p>
+
             <h4>Symptoms</h4>
             <ul>
                 <li><code>ping 192.168.1.39</code> → Request timed out.</li>
                 <li><code>Test-NetConnection</code> → Ping failed.</li>
-                <li>WSL IP (<code>172.17.66.30</code>) was visible, but communication from another laptop was not possible.</li>
+                <li>WSL IP (<code>172.17.66.30</code>) was visible, but communication from another laptop was not
+                    possible.</li>
             </ul>
 
             <h4>Step 1: Verify WSL IP</h4>
@@ -477,12 +485,14 @@ hostname -I</code></pre>
             <h4>Step 3: Test Network Connectivity</h4>
             <p>From Laptop B:</p>
             <pre><code>ping 192.168.1.39</code></pre>
-            <p>Result: <code>Request timed out</code><br>This indicated that the problem was with Windows networking, not WSL.</p>
+            <p>Result: <code>Request timed out</code><br>This indicated that the problem was with Windows networking,
+                not WSL.</p>
 
             <h4>Step 4: Check Network Profile</h4>
             <p>Run:</p>
             <pre><code>Get-NetConnectionProfile</code></pre>
-            <p>Result: <code>NetworkCategory : Public</code><br>A Public network blocks many incoming connections by default.</p>
+            <p>Result: <code>NetworkCategory : Public</code><br>A Public network blocks many incoming connections by
+                default.</p>
 
             <h4>Step 5: Change Network to Private</h4>
             <p>Run as Administrator:</p>
@@ -499,10 +509,13 @@ hostname -I</code></pre>
             <h4>Step 7: Test Again</h4>
             <p>From Laptop B:</p>
             <pre><code>ping 192.168.1.39</code></pre>
-            <p>Result: <code>Reply from 192.168.1.39</code><br>Communication between the two laptops was successfully established.</p>
+            <p>Result: <code>Reply from 192.168.1.39</code><br>Communication between the two laptops was successfully
+                established.</p>
 
             <h4>Root Cause</h4>
-            <p>The Windows Wi-Fi network was configured as <strong>Public</strong>, causing Windows Firewall to block incoming ICMP and network traffic between devices. Since Laptop B could not even reach Windows on Laptop A, the issue was unrelated to WSL.</p>
+            <p>The Windows Wi-Fi network was configured as <strong>Public</strong>, causing Windows Firewall to block
+                incoming ICMP and network traffic between devices. Since Laptop B could not even reach Windows on Laptop
+                A, the issue was unrelated to WSL.</p>
         </section>
 
         <!-- QUICK REFERENCE -->
