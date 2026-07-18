@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Octo-Shell | Build Your Own Shell in C</title>
 
-    <p class="caption">proof - all base stages completed on Codecrafters </p>
+
     <meta name="description"
         content="A beginner-friendly guide to building a custom Unix shell with encrypted file transfer and intrusion detection in C.">
     <link rel="stylesheet" href="style.css">
@@ -405,256 +405,201 @@ Keystream: 186 209 252 43 142 149 240 ...  (must match!)</pre>
             <p>Check Terminal 1:</p>
             <pre class="output"><span class="red">[!] ALERT: Intruder detected! Source: 142.250.x.x</span></pre>
 
-            <h2> Testing with 2 Laptop... the actual stuff cuz you need to be able to contact ur teammate who is using a
-                different laptop</h2>
-            <p>This is where it gets fun — you're running your IDS on one machine and attacking it from another. Here's
-                the full walkthrough.</p>
-            <h3>Phase 1: Prepare Laptop A (The Sentinel)</h3>
-            <p>This is the laptop that runs your C code. It watches the network.</p>
-            <p><strong>Find your IP address:</strong></p>
-            <pre><code>hostname -I</code></pre>
-            <p>Write this down — you'll need it. It'll look something like <code>172.17.66.10</code>.</p>
-            <p><strong>Compile and run the tripwire:</strong></p>
-            <pre><code># Navigate to your project folder
-cd /mnt/c/path/to/your/project
-# Compile
-gcc src/tripwire.c -o src/tripwire
-# Run with sudo (raw sockets need root!)
-sudo ./src/tripwire</code></pre>
-            <p>You should see:</p>
-            <pre class="output">Tripwire Active. Monitoring traffic...</pre>
-            <p><strong>Keep this terminal open.</strong> This is your security monitor — it'll show Green/Red alerts as
-                traffic comes in.</p>
-            <h3>Phase 2: Setup Laptop B (The Intruder/Teammate)</h3>
-            <p>Don't have WSL on Laptop B? No problem! PowerShell has built-in networking tools that work just fine.</p>
-            <p><strong>Open PowerShell as Administrator:</strong></p>
-            <li>Search for "PowerShell" in the Start menu</li>
-            <li>Right-click it</li>
-            <li>Click <strong>"Run as Administrator"</strong></li>
-            </ol>
-            <p><strong>Verify the laptops can see each other:</strong></p>
-            <pre><code>ping [IP_OF_LAPTOP_A]</code></pre>
-            <p>Replace <code>[IP_OF_LAPTOP_A]</code> with the IP you noted down earlier (e.g.
-                <code>172.17.66.10</code>).
-            </p>
-            <div class="warning-box">
-                <strong>Ping not working?</strong> Check these:
-                <ul>
-                    <li>Both laptops must be on the <strong>same WiFi network</strong></li>
-                    <li>On Windows, go to Settings → Network → change the Network Profile to <strong>"Private"</strong>
-                        (not "Public")</li>
-                    <li>If using a mobile hotspot, both laptops must be connected to the same phone</li>
-                </ul>
-            </div>
-            <h3>Phase 3: The Testing Steps</h3>
-            <p>Both laptops are ready. Now let's test.</p>
-            <h4>Test 1: The "Teammate" (expect Green ✅)</h4>
-            <p>This simulates an authorized connection from a known teammate.</p>
-            <p><strong>On Laptop A</strong> — open a <em>new</em> terminal window (keep tripwire running in the other
-                one) and start a listener:</p>
-            <pre><code>nc -l 8080</code></pre>
-            <p>This opens port 8080 and waits for a connection. The terminal will just sit there blinking — that's
-                normal.</p>
-            <p><strong>On Laptop B</strong> — connect to Laptop A from PowerShell:</p>
-            <pre><code># PowerShell's built-in netcat equivalent
-Test-NetConnection -ComputerName [IP_OF_LAPTOP_A] -Port 8080</code></pre>
-            <p>Or if you have netcat installed on Laptop B:</p>
-            <pre><code>nc [IP_OF_LAPTOP_A] 8080</code></pre>
-            <p><strong>Now check Laptop A's tripwire terminal.</strong> You should see:</p>
-            <pre class="output"><span class="green">[*] Authorized traffic from: [IP_OF_LAPTOP_B]</span></pre>
-            <p>Green text! The tripwire recognized the connection as coming from a trusted IP. 🎉</p>
-            <h4>Test 2: The "Intruder" (expect Red )</h4>
-            <p>Now let's trigger the alarm. Keep everything running on Laptop A.</p>
-            <p><strong>On Laptop B</strong> — try connecting to a port you're NOT using:</p>
-            <pre><code># Try port 22 (SSH) or any random port
-Test-NetConnection -ComputerName [IP_OF_LAPTOP_A] -Port 22</code></pre>
-            <p><strong>Check Laptop A's tripwire terminal:</strong></p>
-            <pre class="output"><span class="red">[!] ALERT: Intruder detected! Source: [IP_OF_LAPTOP_B]</span></pre>
-            <p>Red text! The tripwire flagged the unauthorized connection attempt. </p>
-            <p>If you see <span class="green">Green for the nc connection</span> and <span class="red">Red for the
-                    unauthorized port</span> — <strong>congratulations, your IDS is working!</strong></p>
+            <!DOCTYPE html>
+            <h2>Tripwire Testing Guide with 2 laptops</h2>
 
-            <hr>
-            <h3>WSL Network Connectivity Troubleshooting Guide</h3>
-            <p><strong>Problem Encountered:</strong> Laptop B was unable to ping Laptop A or communicate with the WSL
-                instance.</p>
-
-            <h4>Symptoms</h4>
+            <h2>Scenario Overview</h2>
+            <p>To verify the functionality of the Tripwire module, we will simulate a scenario using two machines on the
+                same local network:</p>
             <ul>
-                <li><code>ping 192.168.1.39</code> → Request timed out.</li>
-                <li><code>Test-NetConnection</code> → Ping failed.</li>
-                <li>WSL IP (<code>172.17.66.30</code>) was visible, but communication from another laptop was not
-                    possible.</li>
+                <li><strong>Machine A (The Source):</strong> Runs the <code>octo-shell</code> and the Tripwire intrusion
+                    detection system.</li>
+                <li><strong>Machine B (The Teammate):</strong> The authorized machine designated to communicate securely
+                    with the source.</li>
             </ul>
 
-            <h4>Step 1: Verify WSL IP</h4>
-            <p>Inside WSL, check the IP address:</p>
-            <pre><code>ip a
-# or
+            <h2>Prerequisites</h2>
+            <ol>
+                <li>Both machines must be connected to the same Local Area Network (LAN).</li>
+                <li>Machine A must be running a Linux environment (or WSL) with <code>gcc</code> installed, since raw
+                    sockets require POSIX capabilities.</li>
+                <li>Administrative (<code>root</code>/<code>sudo</code>) privileges are required on Machine A to bind to
+                    <code>SOCK_RAW</code>.
+                </li>
+            </ol>
+
+            <hr>
+
+            <h3>Step 1: Network Configuration</h3>
+            <p>Identify the local IP addresses of both machines.</p>
+            <ul>
+                <li>Assume <strong>Machine A</strong> has the IP <code>192.168.1.10</code>.</li>
+                <li>Assume <strong>Machine B</strong> has the IP <code>192.168.1.15</code>.</li>
+            </ul>
+
+            <h3>Step 2: Configure the Trusted Teammate</h3>
+            <ol>
+                <li>On <strong>Machine A</strong>, open the source code file <code>src/tripwire.c</code>.</li>
+                <li>Locate the <code>#define</code> directive for the teammate's IP address.</li>
+                <li>Update the value to match the IP address of Machine B:</li>
+            </ol>
+            <pre><code>#define TEAMMATE_IP "192.168.1.15"</code></pre>
+            <p>Save the file.</p>
+
+            <h3>Step 3: Compilation and Execution</h3>
+            <pre><code>cd src
+gcc tripwire.c -o tripwire
+sudo ./tripwire</code></pre>
+            <p><em>Expected Output:</em></p>
+            <pre><code>Tripwire Active. Monitoring traffic...</code></pre>
+
+            <h3>Step 4: Simulating Authorized Traffic (Teammate)</h3>
+            <ol>
+                <li>On <strong>Machine B</strong>, send a request to Machine A:</li>
+            </ol>
+            <pre><code>curl http://192.168.1.10</code></pre>
+            <p><strong>Verification:</strong> On Machine A’s terminal, Tripwire should output:</p>
+            <pre><code>[*] Authorized traffic from: 192.168.1.15</code></pre>
+
+            <h3>Step 5: Simulating Unauthorized Traffic (Intruder)</h3>
+            <ol>
+                <li>From an unauthorized device (e.g., IP <code>192.168.1.50</code>):</li>
+            </ol>
+            <pre><code>curl http://192.168.1.10</code></pre>
+            <p><strong>Verification:</strong> On Machine A’s terminal, Tripwire should output:</p>
+            <pre><code>[!] ALERT: Intruder detected! Source: 192.168.1.50</code></pre>
+
+            <hr>
+
+            <p>If you see <span style="color:green;">Green for the teammate</span> and <span style="color:red;">Red
+                    for the intruder</span>, your Tripwire IDS is working correctly.</p>
+
+
+            <hr>
+
+
+            <section>
+
+                <h1>Problem Encountered</h1>
+                <p>Laptop B was unable to ping Laptop A or communicate with the WSL instance.</p>
+
+                <div class="section">
+                    <h2>Symptoms</h2>
+                    <ul>
+                        <li><code>ping 192.168.1.39</code> → Request timed out.</li>
+                        <li><code>Test-NetConnection</code> → Ping failed.</li>
+                        <li>WSL IP (<code>172.17.66.30</code>) was visible, but communication from another laptop was
+                            not
+                            possible.</li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h2>Step 1: Verify WSL IP</h2>
+                    <pre><code>ip a
 hostname -I</code></pre>
-            <p>Result: <code>WSL IP = 172.17.66.30</code></p>
+                    <p>Result: <strong>WSL IP = 172.17.66.30</strong></p>
+                </div>
 
-            <h4>Step 2: Verify Windows Wi-Fi IP</h4>
-            <p>In Windows PowerShell:</p>
-            <pre><code>ipconfig</code></pre>
-            <p>Result: <code>Wi-Fi IP = 192.168.1.39</code></p>
+                <div class="section">
+                    <h2>Step 2: Verify Windows Wi-Fi IP</h2>
+                    <pre><code>ipconfig</code></pre>
+                    <p>Result: <strong>Wi-Fi IP = 192.168.1.39</strong></p>
+                </div>
 
-            <h4>Step 3: Test Network Connectivity</h4>
-            <p>From Laptop B:</p>
-            <pre><code>ping 192.168.1.39</code></pre>
-            <p>Result: <code>Request timed out</code><br>This indicated that the problem was with Windows networking,
-                not WSL.</p>
+                <div class="section">
+                    <h2>Step 3: Test Network Connectivity</h2>
+                    <pre><code>ping 192.168.1.39</code></pre>
+                    <p>Result: Request timed out → Problem lies with Windows networking, not WSL.</p>
+                </div>
 
-            <h4>Step 4: Check Network Profile</h4>
-            <p>Run:</p>
-            <pre><code>Get-NetConnectionProfile</code></pre>
-            <p>Result: <code>NetworkCategory : Public</code><br>A Public network blocks many incoming connections by
-                default.</p>
+                <div class="section">
+                    <h2>Step 4: Check Network Profile</h2>
+                    <pre><code>Get-NetConnectionProfile</code></pre>
+                    <p>Result: <strong>NetworkCategory : Public</strong></p>
+                    <p>A Public network blocks many incoming connections by default.</p>
+                </div>
 
-            <h4>Step 5: Change Network to Private</h4>
-            <p>Run as Administrator:</p>
-            <pre><code>Set-NetConnectionProfile -InterfaceAlias "Wi-Fi" -NetworkCategory Private</code></pre>
-            <p>Verify:</p>
-            <pre><code>Get-NetConnectionProfile</code></pre>
-            <p>Result: <code>NetworkCategory : Private</code></p>
-
-            <h4>Step 6: Enable Ping Through Firewall</h4>
-            <p>Run:</p>
-            <pre><code>Enable-NetFirewallRule -Name FPS-ICMP4-ERQ-In</code></pre>
-            <p>This allows incoming ICMP (ping) requests.</p>
-
-            <h4>Step 7: Test Again</h4>
-            <p>From Laptop B:</p>
-            <pre><code>ping 192.168.1.39</code></pre>
-            <p>Result: <code>Reply from 192.168.1.39</code><br>Communication between the two laptops was successfully
-                established.</p>
-
-            <h4>Root Cause</h4>
-            <p>The Windows Wi-Fi network was configured as <strong>Public</strong>, causing Windows Firewall to block
-                incoming ICMP and network traffic between devices. Since Laptop B could not even reach Windows on Laptop
-                A, the issue was unrelated to WSL.</p>
-        </section>
-
-        <section>
-
-            <h1>Problem Encountered</h1>
-            <p>Laptop B was unable to ping Laptop A or communicate with the WSL instance.</p>
-
-            <div class="section">
-                <h2>Symptoms</h2>
-                <ul>
-                    <li><code>ping 192.168.1.39</code> → Request timed out.</li>
-                    <li><code>Test-NetConnection</code> → Ping failed.</li>
-                    <li>WSL IP (<code>172.17.66.30</code>) was visible, but communication from another laptop was not
-                        possible.</li>
-                </ul>
-            </div>
-
-            <div class="section">
-                <h2>Step 1: Verify WSL IP</h2>
-                <pre><code>ip a
-hostname -I</code></pre>
-                <p>Result: <strong>WSL IP = 172.17.66.30</strong></p>
-            </div>
-
-            <div class="section">
-                <h2>Step 2: Verify Windows Wi-Fi IP</h2>
-                <pre><code>ipconfig</code></pre>
-                <p>Result: <strong>Wi-Fi IP = 192.168.1.39</strong></p>
-            </div>
-
-            <div class="section">
-                <h2>Step 3: Test Network Connectivity</h2>
-                <pre><code>ping 192.168.1.39</code></pre>
-                <p>Result: Request timed out → Problem lies with Windows networking, not WSL.</p>
-            </div>
-
-            <div class="section">
-                <h2>Step 4: Check Network Profile</h2>
-                <pre><code>Get-NetConnectionProfile</code></pre>
-                <p>Result: <strong>NetworkCategory : Public</strong></p>
-                <p>A Public network blocks many incoming connections by default.</p>
-            </div>
-
-            <div class="section">
-                <h2>Step 5: Change Network to Private</h2>
-                <pre><code>Set-NetConnectionProfile -InterfaceAlias "Wi-Fi" -NetworkCategory Private
+                <div class="section">
+                    <h2>Step 5: Change Network to Private</h2>
+                    <pre><code>Set-NetConnectionProfile -InterfaceAlias "Wi-Fi" -NetworkCategory Private
 Get-NetConnectionProfile</code></pre>
-                <p>Result: <strong>NetworkCategory : Private</strong></p>
-            </div>
+                    <p>Result: <strong>NetworkCategory : Private</strong></p>
+                </div>
 
-            <div class="section">
-                <h2>Step 6: Enable Ping Through Firewall</h2>
-                <pre><code>Enable-NetFirewallRule -Name FPS-ICMP4-ERQ-In</code></pre>
-                <p>This allows incoming ICMP (ping) requests.</p>
-            </div>
+                <div class="section">
+                    <h2>Step 6: Enable Ping Through Firewall</h2>
+                    <pre><code>Enable-NetFirewallRule -Name FPS-ICMP4-ERQ-In</code></pre>
+                    <p>This allows incoming ICMP (ping) requests.</p>
+                </div>
 
-            <div class="section">
-                <h2>Step 7: Test Again</h2>
-                <pre><code>ping 192.168.1.39</code></pre>
-                <p>Result: <strong>Reply from 192.168.1.39</strong> → Communication successful.</p>
-            </div>
+                <div class="section">
+                    <h2>Step 7: Test Again</h2>
+                    <pre><code>ping 192.168.1.39</code></pre>
+                    <p>Result: <strong>Reply from 192.168.1.39</strong> → Communication successful.</p>
+                </div>
 
-            <div class="section">
-                <h2>Root Cause</h2>
-                <p>The Windows Wi-Fi network was configured as <strong>Public</strong>, causing Windows Firewall to
-                    block incoming ICMP and network traffic. Since Laptop B could not reach Windows on Laptop A, the
-                    issue was unrelated to WSL.</p>
-            </div>
+                <div class="section">
+                    <h2>Root Cause</h2>
+                    <p>The Windows Wi-Fi network was configured as <strong>Public</strong>, causing Windows Firewall to
+                        block incoming ICMP and network traffic. Since Laptop B could not reach Windows on Laptop A, the
+                        issue was unrelated to WSL.</p>
+                </div>
 
-            <div class="summary">
-                <h2>Solution Summary</h2>
-                <ol>
-                    <li>Verified WSL IP using <code>ip a</code>.</li>
-                    <li>Verified Windows Wi-Fi IP using <code>ipconfig</code>.</li>
-                    <li>Tested connectivity using <code>ping</code>.</li>
-                    <li>Checked network profile using <code>Get-NetConnectionProfile</code>.</li>
-                    <li>Changed the network from <strong>Public</strong> to <strong>Private</strong>.</li>
-                    <li>Enabled Windows Firewall ICMP rule (<code>Enable-NetFirewallRule -Name FPS-ICMP4-ERQ-In</code>).
-                    </li>
-                    <li>Confirmed successful communication by pinging Laptop A from Laptop B.</li>
-                </ol>
-            </div>
-        </section>
+                <div class="summary">
+                    <h2>Solution Summary</h2>
+                    <ol>
+                        <li>Verified WSL IP using <code>ip a</code>.</li>
+                        <li>Verified Windows Wi-Fi IP using <code>ipconfig</code>.</li>
+                        <li>Tested connectivity using <code>ping</code>.</li>
+                        <li>Checked network profile using <code>Get-NetConnectionProfile</code>.</li>
+                        <li>Changed the network from <strong>Public</strong> to <strong>Private</strong>.</li>
+                        <li>Enabled Windows Firewall ICMP rule
+                            (<code>Enable-NetFirewallRule -Name FPS-ICMP4-ERQ-In</code>).
+                        </li>
+                        <li>Confirmed successful communication by pinging Laptop A from Laptop B.</li>
+                    </ol>
+                </div>
+            </section>
 
-        <!-- QUICK REFERENCE -->
-        <section id="quickref">
-            <h2> Quick Reference — All Commands</h2>
-            <table>
-                <tr>
-                    <th>What</th>
-                    <th>Command</th>
-                </tr>
-                <tr>
-                    <td>Open WSL</td>
-                    <td><code>wsl -d ubuntu</code></td>
-                </tr>
-                <tr>
-                    <td>Compile everything</td>
-                    <td><code>make clean && make</code></td>
-                </tr>
-                <tr>
-                    <td>Run the shell</td>
-                    <td><code>./octo-shell</code></td>
-                </tr>
-                <tr>
-                    <td>Start listener</td>
-                    <td><code>nittalk -listen</code></td>
-                </tr>
-                <tr>
-                    <td>Send a file</td>
-                    <td><code>nittalk -s 127.0.0.1 filename.txt</code></td>
-                </tr>
-                <tr>
-                    <td>Compile tripwire</td>
-                    <td><code>gcc src/tripwire.c -o src/tripwire</code></td>
-                </tr>
-                <tr>
-                    <td>Run tripwire</td>
-                    <td><code>sudo ./src/tripwire</code></td>
-                </tr>
-            </table>
-        </section>
+            <!-- QUICK REFERENCE -->
+            <section id="quickref">
+                <h2> Quick Reference — All Commands</h2>
+                <table>
+                    <tr>
+                        <th>What</th>
+                        <th>Command</th>
+                    </tr>
+                    <tr>
+                        <td>Open WSL</td>
+                        <td><code>wsl -d ubuntu</code></td>
+                    </tr>
+                    <tr>
+                        <td>Compile everything</td>
+                        <td><code>make clean && make</code></td>
+                    </tr>
+                    <tr>
+                        <td>Run the shell</td>
+                        <td><code>./octo-shell</code></td>
+                    </tr>
+                    <tr>
+                        <td>Start listener</td>
+                        <td><code>nittalk -listen</code></td>
+                    </tr>
+                    <tr>
+                        <td>Send a file</td>
+                        <td><code>nittalk -s 127.0.0.1 filename.txt</code></td>
+                    </tr>
+                    <tr>
+                        <td>Compile tripwire</td>
+                        <td><code>gcc src/tripwire.c -o src/tripwire</code></td>
+                    </tr>
+                    <tr>
+                        <td>Run tripwire</td>
+                        <td><code>sudo ./src/tripwire</code></td>
+                    </tr>
+                </table>
+            </section>
 
     </main>
 
